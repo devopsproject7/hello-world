@@ -1,0 +1,91 @@
+currentBuild.displayName = "Devops learning # "+currentBuild.number       //---> Global variable reference--- currentbuild
+
+pipeline{
+    agent any
+  /*   environment{
+             PATH = $PATH: /opt/maven3/bin
+    } */
+    
+    triggers {
+    pollSCM '*/1 * * * *'
+   }
+
+    stages{
+        stage("Scm checkout "){
+            steps{
+                git branch: 'master', url: 'https://github.com/devopsproject7/hello-world.git'
+
+            }
+        }
+        stage("Build"){
+            steps{
+                script{
+                def mvnHome = tool name: 'maven3', type: 'maven'
+                sh "${mvnHome}/bin/mvn package"
+                }
+            }
+        }
+
+
+
+       stage("Deploy war file to tomcat"){        //   ---> sshPublisher
+            steps{
+                    sshPublisher(publishers: [sshPublisherDesc(configName: 'tomcat',
+                    transfers: [sshTransfer(cleanRemote: false, excludes: '',
+                    execCommand: '', execTimeout: 120000, flatten: false,
+                    makeEmptyDirs: false, noDefaultExcludes: false,
+                    patternSeparator: '[, ]+', remoteDirectory: '',
+                    remoteDirectorySDF: false, removePrefix: 'webapp/target/',
+                    sourceFiles: 'webapp/target/webapp.war')], usePromotionTimestamp: false,
+                    useWorkspaceInPromotion: false, verbose: true)])
+
+                }
+
+            }
+        
+    /*  def tomcatUsr = 'ec2-user'
+
+
+            sshagent(['tomcat-dev']) {           //   ---> ssh  agent
+                    sh "ssh -o StrictHostKeyChecking=no ${tomcatUsr}@172.31.12.253 /opt/tomcat8/bin/shutdown.sh"
+                    sh "ssh ${tomcatUsr}@172.31.12.253 rm -rf /opt/tomcat8/webapps/myweb*"
+                    sh "scp target/myweb.war ${tomcatUsr}@172.31.12.253:/opt/tomcat8/webapps/"
+                    sh "ssh ${tomcatUsr}@172.31.12.253 /opt/tomcat8/bin/startup.sh"
+                    sh 'ssh ec2-user@172.31.17.196 sudo service tomcat restart'
+                    
+                }
+
+            sshagent(['tomcat-dev']) {
+                    sh """
+                    scp -o StrictHostKeyChecking=no target/myweb.war ${tomcatUsr}@172.31.12.253:/opt/tomcat8/webapps/"
+                    ssh ${tomcatUsr}@172.31.12.253 /opt/tomcat8/bin/startup.sh
+                    ssh ec2-user@172.31.17.196 sudo service tomcat restart
+                """
+            }
+ */
+
+
+
+        stage("Email Notification"){
+            steps{
+                mail bcc: '', body: 'Welcome to Jenkins',
+                cc: '', from: '', replyTo: '', subject: 'Devops learning',
+                to: 'devopsvid07@gmail.com'
+            }
+        }
+
+        stage("Slack Notification"){
+            steps{
+                slackSend baseUrl: 'https://hooks.slack.com/services/', 
+                channel: '#devops-project', color: 'good',
+                 message: 'Welcome to Jenkins', tokenCredentialId: 'slack'
+            }
+        }
+
+
+
+
+
+    }
+
+}
