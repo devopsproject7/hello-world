@@ -2,12 +2,13 @@ currentBuild.displayName = "Devops learning # "+currentBuild.number
 
 pipeline{
    agent any
+
      tools {
-         git  'git2'
+         git  'git2'      //  /bin/git  in Global tool   config
      // maven 'maven3'    //maven added to PATH
     }
 
-    environment{
+    environment{                    //tool: pre-defined tool installation
        def mvnHOME = tool name: 'maven3', type: 'maven'  
         DOCKER_TAG = getDockerTag()
     }
@@ -16,20 +17,33 @@ pipeline{
     pollSCM '*/1 * * * *'
    }
 
+
+
   stages{
+
+
     stage("SCM checkout "){
         steps{
-            echo "Hello world!!"
+            echo "Hello world!!"                    //---> git
             git branch: 'master', url: 'https://github.com/devopsproject7/hello-world.git'
         }
     }
+
+
+
     stage("maven build"){
         steps{
-            sh 'echo $PATH'
-            sh '${mvnHOME}/bin/mvn  package'
+            script{
+            sh 'echo $PATH'            
+            def mvnHome = tool name: 'maven3', type: 'maven'    //--->tool: pre-defined tool installation
+            sh "${mvnHome}/bin/mvn package"
+            } 
 
         }
     }
+
+
+
     stage('SonarQube Analysis') {
         steps{
             echo "SonarQube Analysis!!"
@@ -44,7 +58,7 @@ pipeline{
         steps{
          script{
           timeout(time: 1, unit: 'HOURS') {
-                // def qg = waitForQualityGate()
+                // dhttps://hooks.slack.com/services/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ef qg = waitForQualityGate()
                 //  if (qg.status != 'OK') {
                //   error "Pipeline aborted due to quality gate failure: ${qg.status}"
                 //  slackSend baseUrl: 'https://hooks.slack.com/services/', 
@@ -56,7 +70,7 @@ pipeline{
         }
     }
 
-
+https://hooks.slack.com/services/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
     stage('Build Docker Image'){
             steps{
                 script{
@@ -81,13 +95,7 @@ pipeline{
  
 
             stage('Push  to DockerHub'){
-            steps{
-                 withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerhubPwd')]) {
-                    sh "docker login -u devopsharish -p  ${dockerhubPwd}"
-                    script{
-                        def tag = latestCommitHash()
-                        sh """
-                            docker push devopsharish/nodeapp:${tag}
+            steps{v1
                             chmod +x changeTag.sh
                             ./changeTag.sh ${tag}
                         """
@@ -105,9 +113,7 @@ pipeline{
              //       """
             //        script{
              //           try{
-            //                sh "ssh ec2-user@52.66.70.61 kubectl apply -f ."
-             //           }catch(error){
-            //                sh "ssh ec2-user@52.66.70.61 kubectl create -f ."
+            //      https://hooks.slack.com/services/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          sh "ssh ec2-user@52.66.70.61 kubectl create -f ."
              //           }
               //      }
               //  }
@@ -115,7 +121,7 @@ pipeline{
         }
 
 
-   stage("Email notification"){
+   stage("Email notification"){                 //--->mail
        steps{
              echo "Email notification!!"
     //        mail bcc: '', body: 'Hello', cc: '',
@@ -125,8 +131,8 @@ pipeline{
        }
 
     }
-   stage('Slack notification'){
-       steps{
+   stage('Slack notification'){              //--->SlackSend
+       steps{                                //https://hooks.slack.com/services/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
             echo "slack notification!!"
       //       slackSend baseUrl: 'https://hooks.slack.com/services/', 
       //       channel: '#devopsprj_notify', color: 'good',

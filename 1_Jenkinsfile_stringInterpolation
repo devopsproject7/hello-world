@@ -1,0 +1,16 @@
+pipeline{
+    agent any
+    
+    stages{
+        stage("  String Interpolation "){
+            steps{
+                script{
+                def name = "harish b"
+                echo "Welcome to ${name}"
+                }
+            }
+ 
+        }
+    }
+
+}

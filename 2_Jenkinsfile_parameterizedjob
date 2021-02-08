@@ -1,0 +1,20 @@
+properties([parameters([choice(choices: ['master', 'hello-1', 'feature-1'], description: 'Parameterized job demo', name: 'branch')])])
+
+pipeline{
+    agent any
+    stages{
+        stage("Parameterized job"){            // ----> properties: Set job properties
+            steps{
+
+                echo "Parameterized job !! "
+                echo "Pullig changes from branch: ${params.branch}"             
+                git branch: "${params.branch}", url: 'https://github.com/devopsproject7/hello-world.git'     //----> git
+
+            }
+
+        }
+    }
+
+}
+
+
