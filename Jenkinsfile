@@ -97,19 +97,20 @@ pipeline{
         }
         stage('Deploy - Kubernetes'){
             steps{
-                sshagent(['kops-k8s']) {
-                    sh """ 
-                       scp -o StrictHostKeyChecking=no services.yml node-app-pod.yml ec2-user@52.66.70.61:/home/ec2-user/
-                       
-                    """
-                    script{
-                        try{
-                            sh "ssh ec2-user@52.66.70.61 kubectl apply -f ."
-                        }catch(error){
-                            sh "ssh ec2-user@52.66.70.61 kubectl create -f ."
-                        }
-                    }
-                }
+                echo "Deploy to k8s"
+            //    sshagent(['kops-k8s']) {
+            //       sh """ 
+            //           scp -o StrictHostKeyChecking=no services.yml node-app-pod.yml ec2-user@52.66.70.61:/home/ec2-user/
+            //           
+             //       """
+            //        script{
+             //           try{
+            //                sh "ssh ec2-user@52.66.70.61 kubectl apply -f ."
+             //           }catch(error){
+            //                sh "ssh ec2-user@52.66.70.61 kubectl create -f ."
+             //           }
+              //      }
+              //  }
             }
         }
 
